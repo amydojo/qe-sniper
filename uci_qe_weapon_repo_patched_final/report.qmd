@@ -1,0 +1,62 @@
+---
+title: "UCI Statistics Data Analysis QE – Practice Report"
+author: "Josh"
+format: pdf
+bibliography: docs/refs.bib
+csl: docs/apa7.csl
+params:
+  dataset_label: "main"
+execute:
+  freeze: auto
+---
+
+```{r setup, include=FALSE}
+pacman::p_load(tidyverse, geepack, lme4, lmerTest, nlme, broom.mixed,
+               mice, survey, QIC, ggplot2, patchwork, janitor,
+               ggeffects, gt, here, targets, clubSandwich, ggResidpanel)
+source("R/theme_pub.R"); source("R/choose_corr.R")
+theme_set(theme_pub())
+options(digits = 3, width = 90)
+```
+
+```{r data}
+lab <- params$dataset_label
+path <- if(lab=="main") "data/CVH_SleepVaso.csv" else paste0("data/", lab, ".csv")
+df <- read_csv(path, show_col_types = FALSE)
+```
+
+## abstract
+
+*fill after results.*
+
+## methods
+
+### statistical models
+
+```{r models}
+gee <- choose_corr(df, "PWV","id",
+        c("time","ApneaIndex","time:ApneaIndex","age","sex","BMI","smoke"))
+lme <- lmer(PWV ~ time*ApneaIndex + age + sex + (time|id), data=df)
+```
+
+### missing-data approach
+
+We used complete cases; exploration of IPW / MICE left for appendix.
+
+## results
+
+```{r tables, echo=FALSE}
+gt::gt(broom.mixed::tidy(gee$best)) %>% gt::as_raw_html()
+```
+
+```{r diagnostics, echo=FALSE}
+diag_resid_panel(lme)
+```
+
+## discussion
+
+Brief interpretation goes here.
+
+## references
+
+(STROBE etc.)
